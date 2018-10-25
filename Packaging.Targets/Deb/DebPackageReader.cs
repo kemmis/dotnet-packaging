@@ -10,7 +10,7 @@ namespace Packaging.Targets.Deb
     /// <summary>
     /// Reads <see cref="DebPackage"/> objects from a <see cref="Stream"/>.
     /// </summary>
-    internal static class DebPackageReader
+    public static class DebPackageReader
     {
         /// <summary>
         /// Reads a <see cref="DebPackage"/> from a <see cref="Stream"/>.
@@ -21,7 +21,7 @@ namespace Packaging.Targets.Deb
         /// <returns>
         /// A <see cref="DebPackage"/> which represents the package.
         /// </returns>
-        internal static DebPackage Read(Stream stream)
+        public static DebPackage Read(Stream stream)
         {
             DebPackage package = new DebPackage();
             using (ArFile archive = new ArFile(stream, leaveOpen: true))

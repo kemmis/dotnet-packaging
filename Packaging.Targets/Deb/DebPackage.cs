@@ -6,7 +6,7 @@ namespace Packaging.Targets.Deb
     /// <summary>
     /// Represents a Debian installer package.
     /// </summary>
-    internal class DebPackage
+    public class DebPackage
     {
         /// <summary>
         /// Gets or sets the Debian installer file format used.

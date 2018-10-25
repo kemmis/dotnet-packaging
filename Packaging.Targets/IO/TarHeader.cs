@@ -91,7 +91,7 @@ namespace Packaging.Targets.IO
 
         public uint FileSize
         {
-            get => Convert.ToUInt32(this.GetString(this.size, 12), 8);
+            get => Convert.ToUInt32(this.GetString(this.size, 12)?.Trim(), 8);
             set => this.size = this.GetUIntTo8(value, 12);
         }
 

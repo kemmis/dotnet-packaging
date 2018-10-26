@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace Packaging.Targets.Deb
 {
@@ -21,7 +22,7 @@ namespace Packaging.Targets.Deb
         /// <returns>
         /// A <see cref="DebPackage"/> which represents the package.
         /// </returns>
-        public static DebPackage Read(Stream stream)
+        public static async Task<DebPackage> Read(Stream stream)
         {
             DebPackage package = new DebPackage();
             using (ArFile archive = new ArFile(stream, leaveOpen: true))
@@ -30,11 +31,11 @@ namespace Packaging.Targets.Deb
                 {
                     if (archive.FileName == "debian-binary")
                     {
-                        ReadDebianBinary(archive, package);
+                        await ReadDebianBinary(archive, package);
                     }
                     else if (archive.FileName == "control.tar.gz")
                     {
-                        ReadControlArchive(archive, package);
+                        await ReadControlArchive(archive, package);
                     }
                 }
             }
@@ -85,17 +86,17 @@ namespace Packaging.Targets.Deb
         /// <param name="package">
         /// The package to update.
         /// </param>
-        private static void ReadDebianBinary(ArFile archive, DebPackage package)
+        private static async Task ReadDebianBinary(ArFile archive, DebPackage package)
         {
             using (Stream stream = archive.Open())
             using (StreamReader reader = new StreamReader(stream))
             {
-                var content = reader.ReadToEnd();
+                var content = await reader.ReadToEndAsync();
                 package.PackageFormatVersion = new Version(content);
             }
         }
 
-        private static void ReadControlArchive(ArFile archive, DebPackage package)
+        private static async Task ReadControlArchive(ArFile archive, DebPackage package)
         {
             package.ControlExtras = new Dictionary<string, DebPackageControlFileData>();
             package.Md5Sums = new Dictionary<string, string>();
@@ -108,6 +109,7 @@ namespace Packaging.Targets.Deb
                     switch (tarFile.FileName)
                     {
                         case "./control":
+                        case "control":
                             using (Stream controlFile = tarFile.Open())
                             {
                                 package.ControlFile = ControlFileParser.Read(controlFile);
@@ -118,7 +120,7 @@ namespace Packaging.Targets.Deb
                             using (var sums = new StreamReader(tarFile.Open()))
                             {
                                 string line;
-                                while ((line = sums.ReadLine()) != null)
+                                while ((line = await sums.ReadLineAsync()) != null)
                                 {
                                     var s = line.Split(new[] { "  " }, 2, StringSplitOptions.None);
                                     package.Md5Sums[s[1]] = s[0];
